@@ -26,7 +26,7 @@ function Select(props: SelectProps): React.ReactElement {
   const inputRef = useRef<HTMLInputElement>(null);
   const [option, setOption] = useState<string>(props.value ?? '');
   const [resolvedOptions, setResolvedOptions] = useState<Options | null>(null);
-  const [openOptionList, setOpenOptionList] = useState(false);
+  const [isOpenList, setIsOpenList] = useState(false);
   const [focusedIndex, setFocusedIndex] = useState<number | null>(null); // 현재 포커싱된 옵션의 인덱스
 
   useEffect(() => {
@@ -47,6 +47,12 @@ function Select(props: SelectProps): React.ReactElement {
     getOptions();
   }, [props.options]);
 
+  useEffect(() => {
+    if (option === '' && !isOpenList) {
+      setFocusedIndex(null);
+    }
+  }, [isOpenList]);
+
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     setOption(e.target.value);
   };
@@ -55,6 +61,7 @@ function Select(props: SelectProps): React.ReactElement {
     if (!resolvedOptions) return;
 
     if (e.key === 'ArrowDown') {
+      openOptionList();
       setFocusedIndex((prevIndex) => {
         if (prevIndex === null || prevIndex >= resolvedOptions.length - 1) {
           return 0;
@@ -63,6 +70,7 @@ function Select(props: SelectProps): React.ReactElement {
         return prevIndex + 1;
       });
     } else if (e.key === 'ArrowUp') {
+      openOptionList();
       setFocusedIndex((prevIndex) => {
         if (prevIndex === null || prevIndex <= 0) {
           return resolvedOptions.length - 1;
@@ -72,7 +80,7 @@ function Select(props: SelectProps): React.ReactElement {
       });
     } else if (e.key === 'Enter') {
       if (focusedIndex !== null && resolvedOptions[focusedIndex]) {
-        handleClickOption(resolvedOptions[focusedIndex]);
+        handleSelectOption(resolvedOptions[focusedIndex], focusedIndex);
       }
     }
   };
@@ -80,24 +88,26 @@ function Select(props: SelectProps): React.ReactElement {
   const handleDeleteOption = () => {
     setOption('');
     setFocusedIndex(null);
+    inputRef.current?.focus();
   };
 
   const handleOpenList = () => {
-    setOpenOptionList(!openOptionList);
+    setIsOpenList(!isOpenList);
   };
 
-  const handleClickOption = (option: Option) => {
+  const handleSelectOption = (option: Option, index: number) => {
     setOption(option.label);
-    setOpenOptionList(false);
-    setFocusedIndex(null);
+    setFocusedIndex(index);
+    closeOpenList();
+    inputRef.current?.focus();
   };
 
-  const onFocus = () => {
-    setOpenOptionList(true);
+  const openOptionList = () => {
+    setIsOpenList(true);
   };
 
-  const onBlur = () => {
-    setOpenOptionList(false);
+  const closeOpenList = () => {
+    setTimeout(() => setIsOpenList(false), 200);
   };
 
   return (
@@ -108,21 +118,21 @@ function Select(props: SelectProps): React.ReactElement {
         value={option}
         onChange={handleInputChange}
         onKeyDown={handleKeyDown}
-        onFocus={onFocus}
-        onBlur={onBlur}
+        onFocus={openOptionList}
+        onBlur={closeOpenList}
       />
 
       <button className={'indicator-button'} onClick={handleDeleteOption}>
         x
       </button>
       <button className={'indicator-button'} onClick={handleOpenList}>
-        {openOptionList ? '닫기' : '열기'}
+        {isOpenList ? '닫기' : '열기'}
       </button>
 
       <OptionList
         options={resolvedOptions}
-        open={openOptionList}
-        onSelect={handleClickOption}
+        open={isOpenList}
+        onSelect={handleSelectOption}
         focusedIndex={focusedIndex}
       />
     </div>

@@ -6,7 +6,7 @@ interface PropsType {
   options: Option[] | null;
   open: boolean;
   focusedIndex: number | null;
-  onSelect?: (option: Option) => void;
+  onSelect?: (option: Option, index: number) => void;
 }
 
 export default function OptionList({ options, open, onSelect, focusedIndex }: PropsType) {
@@ -19,10 +19,10 @@ export default function OptionList({ options, open, onSelect, focusedIndex }: Pr
         block: 'nearest',
       });
     }
-  }, [focusedIndex]);
+  }, [open, focusedIndex]);
 
-  const handleClickOption = (option: Option) => {
-    onSelect?.(option);
+  const handleClickOption = (option: Option, index: number) => {
+    onSelect?.(option, index);
   };
 
   return open ? (
@@ -33,7 +33,7 @@ export default function OptionList({ options, open, onSelect, focusedIndex }: Pr
             key={index}
             ref={(ref) => (optionRefs.current[index] = ref)}
             className={`option-item ${focusedIndex === index ? 'focused' : ''}`}
-            onClick={() => handleClickOption(option)}
+            onClick={() => handleClickOption(option, index)}
           >
             <span>{option.label}</span>
           </div>
