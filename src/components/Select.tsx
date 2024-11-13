@@ -1,6 +1,7 @@
-import React, { ChangeEvent, useEffect, useRef, useState } from 'react';
+import React, { ChangeEvent, KeyboardEvent, useEffect, useRef, useState } from 'react';
 import '../styles/select-style.css';
 import Option from '../entity/Option';
+import OptionList from './OptionList';
 
 type Options = Array<Option>;
 
@@ -59,6 +60,10 @@ function Select(props: SelectProps): React.ReactElement {
     setOpenOptionList(!openOptionList);
   };
 
+  const handleClickOption = (option: Option) => {
+    setOption(option.label);
+  };
+
   return (
     <div className={'select-container'}>
       <input ref={inputRef} className={'input-box'} value={option} onChange={handleInputChange} />
@@ -69,6 +74,8 @@ function Select(props: SelectProps): React.ReactElement {
       <button className={'indicator-button'} onClick={handleOpenList}>
         {openOptionList ? '닫기' : '열기'}
       </button>
+
+      <OptionList options={resolvedOptions} open={openOptionList} onSelect={handleClickOption} />
     </div>
   );
 }
