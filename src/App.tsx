@@ -1,26 +1,27 @@
-import React from 'react';
-import logo from './logo.svg';
+import React, {useState} from 'react';
 import './App.css';
+import {Select} from "./components/Select";
+import {fetchTop100Films} from "./data/fetchTop100Films";
+import top100Films from './data/top100Films.json'
 
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+    const [selectedValue, setSelectedValue] = useState<string>();
+    return (
+        <div className="App">
+            <div>
+                <Select
+                    value={selectedValue}
+                    options={top100Films}
+                    onChange={(value) => setSelectedValue(value)}
+                />
+                <Select
+                    value={selectedValue}
+                    options={fetchTop100Films}
+                    onChange={(value) => setSelectedValue(value)}
+                />
+            </div>
+        </div>
+    );
 }
 
 export default App;
