@@ -1,5 +1,5 @@
 import Option from '../entity/Option';
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import '../styles/select-style.css';
 
 interface PropsType {
@@ -10,6 +10,17 @@ interface PropsType {
 }
 
 export default function OptionList({ options, open, onSelect, focusedIndex }: PropsType) {
+  const optionRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+  useEffect(() => {
+    if (focusedIndex !== null && optionRefs.current[focusedIndex]) {
+      optionRefs.current[focusedIndex]?.scrollIntoView({
+        behavior: 'auto',
+        block: 'nearest',
+      });
+    }
+  }, [focusedIndex]);
+
   const handleClickOption = (option: Option) => {
     onSelect?.(option);
   };
@@ -20,6 +31,7 @@ export default function OptionList({ options, open, onSelect, focusedIndex }: Pr
         return (
           <div
             key={index}
+            ref={(ref) => (optionRefs.current[index] = ref)}
             className={`option-item ${focusedIndex === index ? 'focused' : ''}`}
             onClick={() => handleClickOption(option)}
           >
