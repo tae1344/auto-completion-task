@@ -51,12 +51,10 @@ function Select(props: SelectProps): React.ReactElement {
   };
 
   const handleDeleteOption = () => {
-    console.log('delete');
     setOption('');
   };
 
   const handleOpenList = () => {
-    console.log('open list');
     setOpenOptionList(!openOptionList);
   };
 
@@ -64,9 +62,24 @@ function Select(props: SelectProps): React.ReactElement {
     setOption(option.label);
   };
 
+  const onFocus = () => {
+    setOpenOptionList(true);
+  };
+
+  const onBlur = () => {
+    setOpenOptionList(false);
+  };
+
   return (
     <div className={'select-container'}>
-      <input ref={inputRef} className={'input-box'} value={option} onChange={handleInputChange} />
+      <input
+        ref={inputRef}
+        className={'input-box'}
+        value={option}
+        onChange={handleInputChange}
+        onFocus={onFocus}
+        onBlur={onBlur}
+      />
 
       <button className={'indicator-button'} onClick={handleDeleteOption}>
         x
