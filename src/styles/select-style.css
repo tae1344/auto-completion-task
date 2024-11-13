@@ -49,6 +49,10 @@
     background-color: #EEE;
 }
 
+.option-item.focused {
+    background-color: #EEE;
+}
+
 .indicator-button {
 
 }

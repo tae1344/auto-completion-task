@@ -27,6 +27,7 @@ function Select(props: SelectProps): React.ReactElement {
   const [option, setOption] = useState<string>(props.value ?? '');
   const [resolvedOptions, setResolvedOptions] = useState<Options | null>(null);
   const [openOptionList, setOpenOptionList] = useState(false);
+  const [focusedIndex, setFocusedIndex] = useState<number | null>(null); // 현재 포커싱된 옵션의 인덱스
 
   useEffect(() => {
     const getOptions = async () => {
@@ -50,8 +51,35 @@ function Select(props: SelectProps): React.ReactElement {
     setOption(e.target.value);
   };
 
+  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (!resolvedOptions) return;
+
+    if (e.key === 'ArrowDown') {
+      setFocusedIndex((prevIndex) => {
+        if (prevIndex === null || prevIndex >= resolvedOptions.length - 1) {
+          return 0;
+        }
+
+        return prevIndex + 1;
+      });
+    } else if (e.key === 'ArrowUp') {
+      setFocusedIndex((prevIndex) => {
+        if (prevIndex === null || prevIndex <= 0) {
+          return resolvedOptions.length - 1;
+        }
+
+        return prevIndex - 1;
+      });
+    } else if (e.key === 'Enter') {
+      if (focusedIndex !== null && resolvedOptions[focusedIndex]) {
+        handleClickOption(resolvedOptions[focusedIndex]);
+      }
+    }
+  };
+
   const handleDeleteOption = () => {
     setOption('');
+    setFocusedIndex(null);
   };
 
   const handleOpenList = () => {
@@ -60,6 +88,8 @@ function Select(props: SelectProps): React.ReactElement {
 
   const handleClickOption = (option: Option) => {
     setOption(option.label);
+    setOpenOptionList(false);
+    setFocusedIndex(null);
   };
 
   const onFocus = () => {
@@ -77,6 +107,7 @@ function Select(props: SelectProps): React.ReactElement {
         className={'input-box'}
         value={option}
         onChange={handleInputChange}
+        onKeyDown={handleKeyDown}
         onFocus={onFocus}
         onBlur={onBlur}
       />
@@ -88,7 +119,12 @@ function Select(props: SelectProps): React.ReactElement {
         {openOptionList ? '닫기' : '열기'}
       </button>
 
-      <OptionList options={resolvedOptions} open={openOptionList} onSelect={handleClickOption} />
+      <OptionList
+        options={resolvedOptions}
+        open={openOptionList}
+        onSelect={handleClickOption}
+        focusedIndex={focusedIndex}
+      />
     </div>
   );
 }
