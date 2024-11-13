@@ -1,6 +1,8 @@
-import React, { ChangeEvent, ReactNode } from "react";
+import React, { ChangeEvent, useEffect, useRef, useState } from 'react';
+import '../styles/select-style.css';
+import Option from '../entity/Option';
 
-type Options = Array<{ value: string; label: string }>;
+type Options = Array<Option>;
 
 type SelectProps = {
   value?: string | null;
@@ -20,7 +22,55 @@ type SelectProps = {
  * - `Select`가 hover 되는 경우와 focus 되는 경우, 그리고 두 경우가 아닌 경우에 대해 `Select`의 스타일이 달라야 합니다.
  */
 function Select(props: SelectProps): React.ReactElement {
-    return (<div></div>)
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [option, setOption] = useState<string>(props.value ?? '');
+  const [resolvedOptions, setResolvedOptions] = useState<Options | null>(null);
+  const [openOptionList, setOpenOptionList] = useState(false);
+
+  useEffect(() => {
+    const getOptions = async () => {
+      try {
+        if (typeof props.options === 'function') {
+          const result = await props.options();
+          setResolvedOptions(result);
+        } else {
+          setResolvedOptions(props.options);
+        }
+      } catch (error) {
+        setResolvedOptions([]);
+      } finally {
+      }
+    };
+
+    getOptions();
+  }, [props.options]);
+
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setOption(e.target.value);
+  };
+
+  const handleDeleteOption = () => {
+    console.log('delete');
+    setOption('');
+  };
+
+  const handleOpenList = () => {
+    console.log('open list');
+    setOpenOptionList(!openOptionList);
+  };
+
+  return (
+    <div className={'select-container'}>
+      <input ref={inputRef} className={'input-box'} value={option} onChange={handleInputChange} />
+
+      <button className={'indicator-button'} onClick={handleDeleteOption}>
+        x
+      </button>
+      <button className={'indicator-button'} onClick={handleOpenList}>
+        {openOptionList ? '닫기' : '열기'}
+      </button>
+    </div>
+  );
 }
 
 export { Select };

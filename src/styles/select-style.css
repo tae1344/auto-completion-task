@@ -1,0 +1,54 @@
+.select-container {
+    display: flex;
+    flex: 1;
+}
+
+.input-box {
+    display: inline-flex;
+    flex-direction: column;
+    position: relative;
+    padding: 0;
+    margin: 0;
+    /*vertical-align: top;*/
+    width: 50dvw;
+    min-width: 0;
+    min-height: 45px;
+
+    border: 1px solid lightgray;
+    border-radius: 4px;
+}
+
+.input-box:hover {
+    border: 1px solid black;
+}
+
+.input-box.focus {
+    border: 1px solid hsl(210, 100%, 42%)
+}
+
+
+.option-container {
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    top: 45px;
+    width: 50dvw;
+    min-height: 150px;
+    max-height: 250px;
+    background-color: #FFFFFF;
+    border: 1px solid black;
+    overflow: scroll;
+    scrollbar-width: none;
+}
+
+.option-item {
+    padding: 10px 16px;
+}
+
+.option-item:hover {
+    background-color: #EEE;
+}
+
+.indicator-button {
+
+}
