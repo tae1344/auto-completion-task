@@ -24,7 +24,8 @@ type SelectProps = {
  */
 function Select(props: SelectProps): React.ReactElement {
   const inputRef = useRef<HTMLInputElement>(null);
-  const [option, setOption] = useState<string>(props.value ?? '');
+  const [selectedOption, setSelectedOption] = useState<Option>(new Option());
+  const [searchValue, setSearchValue] = useState<string>('');
   const [resolvedOptions, setResolvedOptions] = useState<Options | null>(null);
   const [filteredOptions, setFilteredOptions] = useState<Options | null>(null);
   const [isOpenList, setIsOpenList] = useState(false);
@@ -51,14 +52,14 @@ function Select(props: SelectProps): React.ReactElement {
   }, [props.options]);
 
   useEffect(() => {
-    if (option === '' && !isOpenList) {
+    if (selectedOption.label === '' && !isOpenList) {
       setFocusedIndex(null);
     }
   }, [isOpenList]);
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const search = e.target.value;
-    setOption(search);
+    setSearchValue(search);
 
     if (resolvedOptions) {
       const filtered = resolvedOptions.filter((option) => option.label.toLowerCase().includes(search.toLowerCase()));
@@ -97,7 +98,8 @@ function Select(props: SelectProps): React.ReactElement {
   };
 
   const handleDeleteOption = () => {
-    setOption('');
+    setSearchValue('');
+    setSelectedOption(new Option());
     setFocusedIndex(null);
     inputRef.current?.focus();
   };
@@ -107,7 +109,8 @@ function Select(props: SelectProps): React.ReactElement {
   };
 
   const handleSelectOption = (option: Option, index: number) => {
-    setOption(option.label);
+    setSearchValue(option.label);
+    setSelectedOption(option);
     setFocusedIndex(index);
     closeOpenList();
     inputRef.current?.focus();
@@ -126,7 +129,7 @@ function Select(props: SelectProps): React.ReactElement {
       <input
         ref={inputRef}
         className={'input-box'}
-        value={option}
+        value={searchValue}
         onChange={handleInputChange}
         onKeyDown={handleKeyDown}
         onFocus={openOptionList}
