@@ -26,6 +26,7 @@ function Select(props: SelectProps): React.ReactElement {
   const inputRef = useRef<HTMLInputElement>(null);
   const [option, setOption] = useState<string>(props.value ?? '');
   const [resolvedOptions, setResolvedOptions] = useState<Options | null>(null);
+  const [filteredOptions, setFilteredOptions] = useState<Options | null>(null);
   const [isOpenList, setIsOpenList] = useState(false);
   const [focusedIndex, setFocusedIndex] = useState<number | null>(null); // 현재 포커싱된 옵션의 인덱스
 
@@ -35,8 +36,10 @@ function Select(props: SelectProps): React.ReactElement {
         if (typeof props.options === 'function') {
           const result = await props.options();
           setResolvedOptions(result);
+          setFilteredOptions(result);
         } else {
           setResolvedOptions(props.options);
+          setFilteredOptions(props.options);
         }
       } catch (error) {
         setResolvedOptions([]);
@@ -54,16 +57,24 @@ function Select(props: SelectProps): React.ReactElement {
   }, [isOpenList]);
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setOption(e.target.value);
+    const search = e.target.value;
+    setOption(search);
+
+    if (resolvedOptions) {
+      const filtered = resolvedOptions.filter((option) => option.label.toLowerCase().includes(search.toLowerCase()));
+      setFilteredOptions(filtered);
+    }
+
+    setIsOpenList(true);
   };
 
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
-    if (!resolvedOptions) return;
+    if (!filteredOptions) return;
 
     if (e.key === 'ArrowDown') {
       openOptionList();
       setFocusedIndex((prevIndex) => {
-        if (prevIndex === null || prevIndex >= resolvedOptions.length - 1) {
+        if (prevIndex === null || prevIndex >= filteredOptions.length - 1) {
           return 0;
         }
 
@@ -73,14 +84,14 @@ function Select(props: SelectProps): React.ReactElement {
       openOptionList();
       setFocusedIndex((prevIndex) => {
         if (prevIndex === null || prevIndex <= 0) {
-          return resolvedOptions.length - 1;
+          return filteredOptions.length - 1;
         }
 
         return prevIndex - 1;
       });
     } else if (e.key === 'Enter') {
-      if (focusedIndex !== null && resolvedOptions[focusedIndex]) {
-        handleSelectOption(resolvedOptions[focusedIndex], focusedIndex);
+      if (focusedIndex !== null && filteredOptions[focusedIndex]) {
+        handleSelectOption(filteredOptions[focusedIndex], focusedIndex);
       }
     }
   };
@@ -130,7 +141,7 @@ function Select(props: SelectProps): React.ReactElement {
       </button>
 
       <OptionList
-        options={resolvedOptions}
+        options={filteredOptions}
         open={isOpenList}
         onSelect={handleSelectOption}
         focusedIndex={focusedIndex}
