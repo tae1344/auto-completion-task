@@ -13,7 +13,7 @@ export default function OptionList({ options, open, onSelect, focusedIndex }: Pr
   const optionRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   useEffect(() => {
-    if (focusedIndex !== null && optionRefs.current[focusedIndex]) {
+    if (focusedIndex !== null && optionRefs.current[focusedIndex] instanceof HTMLElement) {
       optionRefs.current[focusedIndex]?.scrollIntoView({
         behavior: 'auto',
         block: 'nearest',
@@ -31,7 +31,9 @@ export default function OptionList({ options, open, onSelect, focusedIndex }: Pr
         return (
           <div
             key={index}
-            ref={(ref) => (optionRefs.current[index] = ref)}
+            ref={(ref) => {
+              optionRefs.current[index] = ref;
+            }}
             className={`option-item ${focusedIndex === index ? 'focused' : ''}`}
             onClick={() => handleClickOption(option, index)}
           >
