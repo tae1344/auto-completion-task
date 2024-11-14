@@ -1,4 +1,4 @@
-import React, { ChangeEvent, KeyboardEvent, useEffect, useRef, useState } from 'react';
+import React, { ChangeEvent, KeyboardEvent, useCallback, useEffect, useRef, useState } from 'react';
 import '../styles/select-style.css';
 import Option from '../entity/Option';
 import OptionList from './OptionList';
@@ -24,7 +24,7 @@ type SelectProps = {
  */
 function Select(props: SelectProps): React.ReactElement {
   const inputRef = useRef<HTMLInputElement>(null);
-  const [selectedOption, setSelectedOption] = useState<Option>(new Option());
+  const [selectedOption, setSelectedOption] = useState<Option | null>(null);
   const [searchValue, setSearchValue] = useState<string>('');
   const [resolvedOptions, setResolvedOptions] = useState<Options | null>(null);
   const [filteredOptions, setFilteredOptions] = useState<Options | null>(null);
@@ -44,6 +44,7 @@ function Select(props: SelectProps): React.ReactElement {
         }
       } catch (error) {
         setResolvedOptions([]);
+        setFilteredOptions([]);
       } finally {
       }
     };
@@ -52,20 +53,26 @@ function Select(props: SelectProps): React.ReactElement {
   }, [props.options]);
 
   useEffect(() => {
-    if (selectedOption.label === '' && !isOpenList) {
+    if (selectedOption === null && !isOpenList) {
       setFocusedIndex(null);
     }
   }, [isOpenList]);
 
+  const filter = (value: string) => {
+    if (!resolvedOptions) return;
+
+    if (value === '') {
+      setFilteredOptions(resolvedOptions);
+    } else {
+      const filtered = resolvedOptions.filter((option) => option.label.toLowerCase().includes(value.toLowerCase()));
+      setFilteredOptions(filtered);
+    }
+  };
+
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const search = e.target.value;
     setSearchValue(search);
-
-    if (resolvedOptions) {
-      const filtered = resolvedOptions.filter((option) => option.label.toLowerCase().includes(search.toLowerCase()));
-      setFilteredOptions(filtered);
-    }
-
+    filter(search);
     setIsOpenList(true);
   };
 
@@ -99,7 +106,7 @@ function Select(props: SelectProps): React.ReactElement {
 
   const handleDeleteOption = () => {
     setSearchValue('');
-    setSelectedOption(new Option());
+    setSelectedOption(null);
     setFocusedIndex(null);
     inputRef.current?.focus();
   };
@@ -117,11 +124,19 @@ function Select(props: SelectProps): React.ReactElement {
   };
 
   const openOptionList = () => {
+    filter(searchValue);
     setIsOpenList(true);
   };
 
   const closeOpenList = () => {
-    setTimeout(() => setIsOpenList(false), 200);
+    setTimeout(() => {
+      setIsOpenList(false);
+    }, 150);
+  };
+
+  const onBlur = () => {
+    closeOpenList();
+    setSearchValue(selectedOption === null ? '' : selectedOption.label);
   };
 
   return (
@@ -133,7 +148,7 @@ function Select(props: SelectProps): React.ReactElement {
         onChange={handleInputChange}
         onKeyDown={handleKeyDown}
         onFocus={openOptionList}
-        onBlur={closeOpenList}
+        onBlur={onBlur}
       />
 
       <button className={'indicator-button'} onClick={handleDeleteOption}>
