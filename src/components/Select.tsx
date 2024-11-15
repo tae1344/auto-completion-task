@@ -45,7 +45,6 @@ function Select(props: SelectProps): React.ReactElement {
       } catch (error) {
         setResolvedOptions([]);
         setFilteredOptions([]);
-      } finally {
       }
     };
 
@@ -71,6 +70,12 @@ function Select(props: SelectProps): React.ReactElement {
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const search = e.target.value;
+
+    if (search === '') {
+      setSelectedOption(null);
+      setFocusedIndex(null);
+    }
+
     setSearchValue(search);
     filter(search);
     setIsOpenList(true);
@@ -81,22 +86,24 @@ function Select(props: SelectProps): React.ReactElement {
 
     if (e.key === 'ArrowDown') {
       openOptionList();
-      setFocusedIndex((prevIndex) => {
-        if (prevIndex === null || prevIndex >= filteredOptions.length - 1) {
-          return 0;
-        }
+      isOpenList &&
+        setFocusedIndex((prevIndex) => {
+          if (prevIndex === null || prevIndex >= filteredOptions.length - 1) {
+            return 0;
+          }
 
-        return prevIndex + 1;
-      });
+          return prevIndex + 1;
+        });
     } else if (e.key === 'ArrowUp') {
       openOptionList();
-      setFocusedIndex((prevIndex) => {
-        if (prevIndex === null || prevIndex <= 0) {
-          return filteredOptions.length - 1;
-        }
+      isOpenList &&
+        setFocusedIndex((prevIndex) => {
+          if (prevIndex === null || prevIndex <= 0) {
+            return filteredOptions.length - 1;
+          }
 
-        return prevIndex - 1;
-      });
+          return prevIndex - 1;
+        });
     } else if (e.key === 'Enter') {
       if (focusedIndex !== null && filteredOptions[focusedIndex]) {
         handleSelectOption(filteredOptions[focusedIndex], focusedIndex);
@@ -112,6 +119,9 @@ function Select(props: SelectProps): React.ReactElement {
   };
 
   const handleOpenList = () => {
+    if (!isOpenList) {
+      inputRef.current?.focus();
+    }
     setIsOpenList(!isOpenList);
   };
 
@@ -124,13 +134,13 @@ function Select(props: SelectProps): React.ReactElement {
   };
 
   const openOptionList = () => {
-    filter(searchValue);
     setIsOpenList(true);
   };
 
   const closeOpenList = () => {
     setTimeout(() => {
       setIsOpenList(false);
+      setFilteredOptions(resolvedOptions);
     }, 150);
   };
 
