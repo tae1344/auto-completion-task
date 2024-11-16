@@ -25,7 +25,7 @@ const OptionList = forwardRef(({ options, open, onSelect, focusedIndex }: PropsT
   };
 
   return open ? (
-    <div ref={ref} className={'option-container'}>
+    <div ref={ref} className={'option-container'} data-testid="option-list">
       {options.length === 0 ? (
         <div className={`no-result`}>
           <span>{'검색 결과가 없어요.'}</span>

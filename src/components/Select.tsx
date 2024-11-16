@@ -75,11 +75,12 @@ function Select(props: SelectProps): React.ReactElement {
 
   const adjustOptionListPosition = () => {
     if (isOpenList && optionListRef.current) {
-      const rect = optionListRef.current.getBoundingClientRect();
+      const listRect = optionListRef.current.getBoundingClientRect();
       const windowHeight = window.innerHeight;
       const inputRect = inputRef.current?.getBoundingClientRect();
 
-      if (rect.bottom > windowHeight && inputRect) {
+      if (inputRect && inputRect.bottom + listRect.height > windowHeight) {
+        // 화면 하단을 벗어나는 경우
         optionListRef.current.style.bottom = `${inputRect.height + 4}px`;
         optionListRef.current.style.top = 'auto';
       } else {
