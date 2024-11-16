@@ -1,5 +1,6 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { Select } from '../../components/Select';
+import Option from '../../entity/Option';
 
 const options = [
   { value: 'foo', label: 'foo' },
@@ -22,6 +23,26 @@ describe('<Select /> TEST', () => {
 
     const input = screen.getByRole('textbox');
     expect(input).toHaveValue('bar123');
+  });
+
+  it('300ms 후 promise 함수 타입의 옵션 목록을 받아 렌더링한다.', async () => {
+    const asyncOptions = async () => {
+      return new Promise<Option[]>((resolve) => {
+        setTimeout(() => {
+          resolve(options);
+        }, 300);
+      });
+    };
+
+    render(<Select options={asyncOptions} />);
+
+    const toggleButton = screen.getByRole('button', { name: 'arrow icon' });
+    fireEvent.click(toggleButton);
+
+    await waitFor(() => {
+      expect(screen.getByText('foo')).toBeInTheDocument();
+      expect(screen.getByText('bar')).toBeInTheDocument();
+    });
   });
 
   it('text input과 button 2개가 렌더링된다.', () => {
