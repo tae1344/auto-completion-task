@@ -35,6 +35,7 @@ type SelectProps = {
 function Select(props: SelectProps): React.ReactElement {
   const inputRef = useRef<HTMLInputElement>(null);
   const optionListRef = useRef<HTMLDivElement>(null);
+
   const [selectedOption, setSelectedOption] = useState<Option | null>(null);
   const [searchValue, setSearchValue] = useState<string>('');
   const [resolvedOptions, setResolvedOptions] = useState<Options | null>(null);
@@ -100,16 +101,19 @@ function Select(props: SelectProps): React.ReactElement {
   }, [isOpenList, filteredOptions, debouncedAdjustOptionListPosition]);
 
   const adjustInputWidth = (options: Options) => {
-    const longestOption = options.reduce((a, b) => (a.label.length > b.label.length ? a : b));
-    const tempSpan = document.createElement('span');
-    tempSpan.style.visibility = 'hidden';
-    tempSpan.style.position = 'absolute';
-    tempSpan.style.whiteSpace = 'nowrap';
-    tempSpan.innerText = longestOption.label;
-    document.body.appendChild(tempSpan);
-    const width = tempSpan.offsetWidth;
-    document.body.removeChild(tempSpan);
-    if (inputRef.current) {
+    if (!inputRef.current) return;
+
+    const longestLabel = options.reduce(
+      (longest, option) => (option.label.length > longest.length ? option.label : longest),
+      '',
+    );
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d');
+
+    if (context) {
+      const style = window.getComputedStyle(inputRef.current);
+      context.font = `${style.fontSize} ${style.fontFamily}`;
+      const width = context.measureText(longestLabel).width;
       inputRef.current.style.width = `${width}px`;
     }
   };
