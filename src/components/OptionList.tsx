@@ -1,5 +1,5 @@
 import Option from '../entity/Option';
-import React, { useEffect, useRef } from 'react';
+import React, { ForwardedRef, forwardRef, useEffect, useRef } from 'react';
 import '../styles/select-style.css';
 
 interface PropsType {
@@ -8,8 +8,7 @@ interface PropsType {
   focusedIndex: number | null;
   onSelect?: (option: Option, index: number) => void;
 }
-
-export default function OptionList({ options, open, onSelect, focusedIndex }: PropsType) {
+const OptionList = forwardRef(({ options, open, onSelect, focusedIndex }: PropsType, ref: ForwardedRef<any>) => {
   const optionRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   useEffect(() => {
@@ -26,7 +25,7 @@ export default function OptionList({ options, open, onSelect, focusedIndex }: Pr
   };
 
   return open ? (
-    <div className={'option-container'} onKeyDown={() => console.log('onKeyDown')}>
+    <div ref={ref} className={'option-container'} onKeyDown={() => console.log('onKeyDown')}>
       {options?.map((option: Option, index: number) => {
         return (
           <div
@@ -43,4 +42,6 @@ export default function OptionList({ options, open, onSelect, focusedIndex }: Pr
       })}
     </div>
   ) : null;
-}
+});
+
+export default OptionList;

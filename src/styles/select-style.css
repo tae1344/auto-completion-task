@@ -33,22 +33,23 @@
     display: flex;
     flex-direction: column;
     position: absolute;
-    top: 45px;
-    width: 50dvw;
     min-height: 150px;
     max-height: 250px;
     background-color: #FFFFFF;
-    border: 1px solid black;
-    overflow: scroll;
+    border: 1px solid #c4c4c4;
+    z-index: 999;
+    overflow-y: auto;
     scrollbar-width: none;
 }
 
 .option-item {
-    padding: 10px 16px;
+    padding: 10px;
+    cursor: pointer;
+    font-size: 14px;
 }
 
 .option-item:hover {
-    background-color: #EEE;
+    background-color: #f0f0f0;
 }
 
 .option-item.focused {

@@ -11,6 +11,7 @@ import React, {
 import '../styles/select-style.css';
 import Option from '../entity/Option';
 import OptionList from './OptionList';
+import useDebounce from '../hooks/useDebounce';
 
 type Options = Array<Option>;
 
@@ -33,6 +34,7 @@ type SelectProps = {
  */
 function Select(props: SelectProps): React.ReactElement {
   const inputRef = useRef<HTMLInputElement>(null);
+  const optionListRef = useRef<HTMLDivElement>(null);
   const [selectedOption, setSelectedOption] = useState<Option | null>(null);
   const [searchValue, setSearchValue] = useState<string>('');
   const [resolvedOptions, setResolvedOptions] = useState<Options | null>(null);
@@ -67,6 +69,33 @@ function Select(props: SelectProps): React.ReactElement {
       setFocusedIndex(null);
     }
   }, [isOpenList]);
+
+  const adjustOptionListPosition = () => {
+    if (isOpenList && optionListRef.current) {
+      const rect = optionListRef.current.getBoundingClientRect();
+      const windowHeight = window.innerHeight;
+      const inputRect = inputRef.current?.getBoundingClientRect();
+
+      if (rect.bottom > windowHeight && inputRect) {
+        optionListRef.current.style.bottom = `${inputRect.height + 4}px`;
+        optionListRef.current.style.top = 'auto';
+      } else {
+        optionListRef.current.style.top = `calc(100% + 4px)`;
+        optionListRef.current.style.bottom = 'auto';
+      }
+    }
+  };
+
+  const debouncedAdjustOptionListPosition = useDebounce(adjustOptionListPosition, 200);
+
+  useEffect(() => {
+    adjustOptionListPosition();
+    window.addEventListener('resize', debouncedAdjustOptionListPosition);
+
+    return () => {
+      window.removeEventListener('resize', debouncedAdjustOptionListPosition);
+    };
+  }, [isOpenList, filteredOptions, debouncedAdjustOptionListPosition]);
 
   const filter = (value: string) => {
     if (!resolvedOptions) return;
@@ -220,6 +249,7 @@ function Select(props: SelectProps): React.ReactElement {
       </div>
 
       <OptionList
+        ref={optionListRef}
         options={filteredOptions}
         open={isOpenList}
         onSelect={handleSelectOption}
