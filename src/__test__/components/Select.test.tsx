@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { Select } from '../../components/Select';
 
 const options = [
@@ -8,23 +8,31 @@ const options = [
   { value: 'qux', label: 'qux' },
 ];
 
+beforeAll(() => {
+  Object.defineProperty(HTMLCanvasElement.prototype, 'getContext', {
+    value: jest.fn(() => ({
+      measureText: (text: string) => ({ width: text.length * 10 }), // 문자열 길이에 기반한 너비 추정
+    })),
+  });
+});
+
 describe('<Select /> TEST', () => {
   it('text input과 button 2개가 렌더링된다.', () => {
     render(<Select options={options} />);
 
     const input = screen.getByRole('textbox');
-    const deleteButton = screen.getByRole('button', { name: 'x' });
-    const toggleButton = screen.getByRole('button', { name: '열기' });
+    const deleteButton = screen.getByRole('button', { name: 'close icon' });
+    const toggleButton = screen.getByRole('button', { name: 'arrow icon' });
 
     expect(input).toBeInTheDocument();
     expect(deleteButton).toBeInTheDocument();
     expect(toggleButton).toBeInTheDocument();
   });
 
-  it('토글 버튼을 클릭하면 옵션 목록이 보인다.', () => {
+  it('토글 버튼을 클릭하면 옵션 목록이 보인다.', async () => {
     render(<Select options={options} />);
 
-    const toggleButton = screen.getByRole('button', { name: '열기' });
+    const toggleButton = screen.getByRole('button', { name: 'arrow icon' });
     fireEvent.click(toggleButton);
 
     expect(screen.getByText('foo')).toBeInTheDocument();
@@ -34,7 +42,7 @@ describe('<Select /> TEST', () => {
   it('토글 버튼을 2번 클릭하면 옵션 목록이 닫힌다.', () => {
     render(<Select options={options} />);
 
-    const toggleButton = screen.getByRole('button', { name: '열기' });
+    const toggleButton = screen.getByRole('button', { name: 'arrow icon' });
     fireEvent.click(toggleButton);
     fireEvent.click(toggleButton);
 
@@ -45,7 +53,7 @@ describe('<Select /> TEST', () => {
   it('옵션을 클릭해 선택한다.', () => {
     render(<Select options={options} />);
 
-    const toggleButton = screen.getByRole('button', { name: '열기' });
+    const toggleButton = screen.getByRole('button', { name: 'arrow icon' });
     fireEvent.click(toggleButton);
 
     const option = screen.getByText('foo');
@@ -58,13 +66,13 @@ describe('<Select /> TEST', () => {
   it('삭제 버튼을 클릭하면 Input의 텍스트가 지워진다.', () => {
     render(<Select options={options} />);
 
-    const toggleButton = screen.getByRole('button', { name: '열기' });
+    const toggleButton = screen.getByRole('button', { name: 'arrow icon' });
     fireEvent.click(toggleButton);
 
     const option = screen.getByText('foo');
     fireEvent.click(option);
 
-    const deleteButton = screen.getByRole('button', { name: 'x' });
+    const deleteButton = screen.getByRole('button', { name: 'close icon' });
     fireEvent.click(deleteButton);
 
     const input = screen.getByRole('textbox');
