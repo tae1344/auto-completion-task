@@ -16,9 +16,7 @@ import useDebounce from '../hooks/useDebounce';
 type Options = Array<Option>;
 
 type SelectProps = {
-  value?: string | null;
   options: Options | (() => Promise<Options>);
-  onChange?: (value: string) => void;
 };
 
 /**

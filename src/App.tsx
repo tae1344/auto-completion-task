@@ -5,8 +5,6 @@ import { fetchTop100Films } from './data/fetchTop100Films';
 import top100Films from './data/top100Films.json';
 
 function App() {
-  const [selectedValue, setSelectedValue] = useState<string>();
-
   return (
     <div
       style={{
@@ -19,8 +17,8 @@ function App() {
         gap: 30,
       }}
     >
-      <Select value={selectedValue} options={top100Films} onChange={(value) => setSelectedValue(value)} />
-      <Select value={selectedValue} options={fetchTop100Films} onChange={(value) => setSelectedValue(value)} />
+      <Select options={top100Films} />
+      <Select options={fetchTop100Films} />
     </div>
   );
 }
