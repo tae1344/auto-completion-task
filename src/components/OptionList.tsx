@@ -1,5 +1,5 @@
 import Option from '../entity/Option';
-import React, { ForwardedRef, forwardRef, useEffect, useRef } from 'react';
+import React, { ForwardedRef, forwardRef, useCallback, useEffect, useRef } from 'react';
 import '../styles/select-style.css';
 
 interface PropsType {
@@ -24,9 +24,15 @@ const OptionList = forwardRef(({ options, open, onSelect, focusedIndex }: PropsT
     onSelect?.(option, index);
   };
 
-  return open ? (
-    <div ref={ref} className={'option-container'} onKeyDown={() => console.log('onKeyDown')}>
-      {options?.map((option: Option, index: number) => {
+  const renderList = useCallback(() => {
+    if (options?.length === 0) {
+      return (
+        <div className={`no-result`}>
+          <span>{'검색 결과가 없어요.'}</span>
+        </div>
+      );
+    } else {
+      return options?.map((option: Option, index: number) => {
         return (
           <div
             key={index}
@@ -39,7 +45,13 @@ const OptionList = forwardRef(({ options, open, onSelect, focusedIndex }: PropsT
             <span>{option.label}</span>
           </div>
         );
-      })}
+      });
+    }
+  }, [options, focusedIndex]);
+
+  return open ? (
+    <div ref={ref} className={'option-container'} onKeyDown={() => console.log('onKeyDown')}>
+      {renderList()}
     </div>
   ) : null;
 });

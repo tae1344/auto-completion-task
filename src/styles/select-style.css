@@ -41,9 +41,15 @@
     scrollbar-width: none;
 }
 
+.no-result {
+    padding: 10px;
+    color: #757575;
+    font-size: 14px;
+}
+
 .option-item {
     padding: 10px;
-    cursor: pointer;
+    cursor: auto;
     font-size: 14px;
 }
 
