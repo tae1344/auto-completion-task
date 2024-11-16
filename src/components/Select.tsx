@@ -1,4 +1,13 @@
-import React, { ChangeEvent, KeyboardEvent, useCallback, useEffect, useRef, useState } from 'react';
+import React, {
+  ChangeEvent,
+  KeyboardEvent,
+  MouseEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import '../styles/select-style.css';
 import Option from '../entity/Option';
 import OptionList from './OptionList';
@@ -30,6 +39,8 @@ function Select(props: SelectProps): React.ReactElement {
   const [filteredOptions, setFilteredOptions] = useState<Options | null>(null);
   const [isOpenList, setIsOpenList] = useState(false);
   const [focusedIndex, setFocusedIndex] = useState<number | null>(null); // 현재 포커싱된 옵션의 인덱스
+  const [isHover, setIsHover] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
 
   useEffect(() => {
     const getOptions = async () => {
@@ -111,7 +122,8 @@ function Select(props: SelectProps): React.ReactElement {
     }
   };
 
-  const handleDeleteOption = () => {
+  const handleDeleteOption = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
     setSearchValue('');
     setSelectedOption(null);
     setFocusedIndex(null);
@@ -135,6 +147,7 @@ function Select(props: SelectProps): React.ReactElement {
 
   const openOptionList = () => {
     setIsOpenList(true);
+    setIsFocused(true);
   };
 
   const closeOpenList = () => {
@@ -146,27 +159,65 @@ function Select(props: SelectProps): React.ReactElement {
 
   const onBlur = () => {
     closeOpenList();
+    setIsFocused(false);
+    setIsHover(false);
     setSearchValue(selectedOption === null ? '' : selectedOption.label);
   };
 
-  return (
-    <div className={'select-container'}>
-      <input
-        ref={inputRef}
-        className={'input-box'}
-        value={searchValue}
-        onChange={handleInputChange}
-        onKeyDown={handleKeyDown}
-        onFocus={openOptionList}
-        onBlur={onBlur}
-      />
+  const onMouseEnter = () => {
+    setIsHover(true);
+  };
 
-      <button className={'indicator-button'} onClick={handleDeleteOption}>
-        x
-      </button>
-      <button className={'indicator-button'} onClick={handleOpenList}>
-        {isOpenList ? '닫기' : '열기'}
-      </button>
+  const onMouseLeave = useCallback(() => {
+    setIsHover(isFocused);
+  }, [isFocused]);
+
+  const onMouseDown = (e: MouseEvent) => {
+    e.preventDefault();
+  };
+
+  const isShowClearButton = useMemo(() => {
+    return searchValue.length > 0 && (isHover || isFocused);
+  }, [isFocused, searchValue, isHover]);
+
+  return (
+    <div className={'select-container'} onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
+      <div className={`input-container ${isFocused ? 'focus' : ''}`}>
+        <input
+          ref={inputRef}
+          className={'input-box'}
+          value={searchValue}
+          onChange={handleInputChange}
+          onKeyDown={handleKeyDown}
+          onFocus={openOptionList}
+          onBlur={onBlur}
+        />
+        <div className={'indicator-container'}>
+          <button
+            className={`indicator-button delete ${!isShowClearButton ? 'disable' : ''}`}
+            onClick={handleDeleteOption}
+            disabled={!isShowClearButton}
+            onMouseDown={onMouseDown}
+          >
+            <img
+              className={`${!isShowClearButton ? 'hide' : ''}`}
+              src={require('../assets/close.png')}
+              alt={'close icon'}
+              width={10}
+              height={10}
+            />
+          </button>
+          <button className={'indicator-button trigger'} onClick={handleOpenList} onMouseDown={onMouseDown}>
+            <img
+              src={isOpenList ? require('../assets/arrow-up.png') : require('../assets/arrow-down.png')}
+              alt={'arrow icon'}
+              width={12}
+              height={12}
+              className={'trigger-icon'}
+            />
+          </button>
+        </div>
+      </div>
 
       <OptionList
         options={filteredOptions}
