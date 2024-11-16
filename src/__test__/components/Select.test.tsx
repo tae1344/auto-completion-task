@@ -138,4 +138,20 @@ describe('<Select /> TEST', () => {
     expect(option.parentElement).toHaveClass('focused');
     expect(option).toBeVisible();
   });
+
+  it('ESC 키를 누르면 열린 옵션 목록이 닫힌다.', async () => {
+    render(<Select options={options} />);
+
+    const input = screen.getByRole('textbox');
+    fireEvent.focus(input);
+
+    fireEvent.keyDown(input, { key: 'ArrowDown' });
+    expect(screen.getByText('foo')).toBeInTheDocument();
+
+    fireEvent.keyDown(input, { key: 'Escape' });
+
+    await waitFor(() => {
+      expect(screen.queryByText('foo')).not.toBeInTheDocument();
+    });
+  });
 });

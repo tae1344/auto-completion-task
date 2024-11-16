@@ -16,7 +16,9 @@ import useDebounce from '../hooks/useDebounce';
 type Options = Array<Option>;
 
 type SelectProps = {
+  value?: string | null;
   options: Options | (() => Promise<Options>);
+  onChange?: (value: string) => void;
 };
 
 /**
@@ -35,9 +37,9 @@ function Select(props: SelectProps): React.ReactElement {
   const optionListRef = useRef<HTMLDivElement>(null);
 
   const [selectedOption, setSelectedOption] = useState<Option | null>(null);
-  const [searchValue, setSearchValue] = useState<string>('');
-  const [resolvedOptions, setResolvedOptions] = useState<Options | null>(null);
-  const [filteredOptions, setFilteredOptions] = useState<Options | null>(null);
+  const [searchValue, setSearchValue] = useState<string>(props.value ?? '');
+  const [resolvedOptions, setResolvedOptions] = useState<Options>([]);
+  const [filteredOptions, setFilteredOptions] = useState<Options>([]);
   const [isOpenList, setIsOpenList] = useState(false);
   const [focusedIndex, setFocusedIndex] = useState<number | null>(null); // 현재 포커싱된 옵션의 인덱스
   const [isHover, setIsHover] = useState(false);
@@ -46,16 +48,16 @@ function Select(props: SelectProps): React.ReactElement {
   useEffect(() => {
     const getOptions = async () => {
       try {
+        let result = [];
         if (typeof props.options === 'function') {
-          const result = await props.options();
-          setResolvedOptions(result);
-          setFilteredOptions(result);
-          adjustInputWidth(result);
+          result = await props.options();
         } else {
-          setResolvedOptions(props.options);
-          setFilteredOptions(props.options);
-          adjustInputWidth(props.options);
+          result = props.options;
         }
+
+        setResolvedOptions(result);
+        setFilteredOptions(result);
+        adjustInputWidth(result);
       } catch (error) {
         setResolvedOptions([]);
         setFilteredOptions([]);
@@ -113,6 +115,8 @@ function Select(props: SelectProps): React.ReactElement {
       context.font = `${style.fontSize} ${style.fontFamily}`;
       const width = context.measureText(longestLabel).width;
       inputRef.current.style.width = `${width}px`;
+    } else {
+      inputRef.current.style.width = `100%`;
     }
   };
 
@@ -163,6 +167,8 @@ function Select(props: SelectProps): React.ReactElement {
 
           return prevIndex - 1;
         });
+    } else if (e.key === 'Escape') {
+      closeOpenList();
     } else if (e.key === 'Enter') {
       if (focusedIndex !== null && filteredOptions[focusedIndex]) {
         handleSelectOption(filteredOptions[focusedIndex], focusedIndex);

@@ -3,7 +3,7 @@ import React, { ForwardedRef, forwardRef, useCallback, useEffect, useRef } from 
 import '../styles/select-style.css';
 
 interface PropsType {
-  options: Option[] | null;
+  options: Option[];
   open: boolean;
   focusedIndex: number | null;
   onSelect?: (option: Option, index: number) => void;
@@ -24,34 +24,28 @@ const OptionList = forwardRef(({ options, open, onSelect, focusedIndex }: PropsT
     onSelect?.(option, index);
   };
 
-  const renderList = useCallback(() => {
-    if (options?.length === 0) {
-      return (
+  return open ? (
+    <div ref={ref} className={'option-container'}>
+      {options.length === 0 ? (
         <div className={`no-result`}>
           <span>{'검색 결과가 없어요.'}</span>
         </div>
-      );
-    } else {
-      return options?.map((option: Option, index: number) => {
-        return (
-          <div
-            key={index}
-            ref={(ref) => {
-              optionRefs.current[index] = ref;
-            }}
-            className={`option-item ${focusedIndex === index ? 'focused' : ''}`}
-            onClick={() => handleClickOption(option, index)}
-          >
-            <span>{option.label}</span>
-          </div>
-        );
-      });
-    }
-  }, [options, focusedIndex]);
-
-  return open ? (
-    <div ref={ref} className={'option-container'} onKeyDown={() => console.log('onKeyDown')}>
-      {renderList()}
+      ) : (
+        options?.map((option: Option, index: number) => {
+          return (
+            <div
+              key={index}
+              ref={(ref) => {
+                optionRefs.current[index] = ref;
+              }}
+              className={`option-item ${focusedIndex === index ? 'focused' : ''}`}
+              onClick={() => handleClickOption(option, index)}
+            >
+              <span>{option.label}</span>
+            </div>
+          );
+        })
+      )}
     </div>
   ) : null;
 });
