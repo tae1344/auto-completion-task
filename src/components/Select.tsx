@@ -51,9 +51,11 @@ function Select(props: SelectProps): React.ReactElement {
           const result = await props.options();
           setResolvedOptions(result);
           setFilteredOptions(result);
+          adjustInputWidth(result);
         } else {
           setResolvedOptions(props.options);
           setFilteredOptions(props.options);
+          adjustInputWidth(props.options);
         }
       } catch (error) {
         setResolvedOptions([]);
@@ -96,6 +98,21 @@ function Select(props: SelectProps): React.ReactElement {
       window.removeEventListener('resize', debouncedAdjustOptionListPosition);
     };
   }, [isOpenList, filteredOptions, debouncedAdjustOptionListPosition]);
+
+  const adjustInputWidth = (options: Options) => {
+    const longestOption = options.reduce((a, b) => (a.label.length > b.label.length ? a : b));
+    const tempSpan = document.createElement('span');
+    tempSpan.style.visibility = 'hidden';
+    tempSpan.style.position = 'absolute';
+    tempSpan.style.whiteSpace = 'nowrap';
+    tempSpan.innerText = longestOption.label;
+    document.body.appendChild(tempSpan);
+    const width = tempSpan.offsetWidth;
+    document.body.removeChild(tempSpan);
+    if (inputRef.current) {
+      inputRef.current.style.width = `${width}px`;
+    }
+  };
 
   const filter = (value: string) => {
     if (!resolvedOptions) return;
