@@ -145,6 +145,13 @@ function Select(props: SelectProps): React.ReactElement {
     setIsOpenList(true);
   };
 
+  const handleInputClick = (e: MouseEvent) => {
+    e.stopPropagation();
+    if (isFocused && !isOpenList) {
+      setIsOpenList(true);
+    }
+  };
+
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (!filteredOptions) return;
 
@@ -246,6 +253,7 @@ function Select(props: SelectProps): React.ReactElement {
           onKeyDown={handleKeyDown}
           onFocus={openOptionList}
           onBlur={onBlur}
+          onClick={handleInputClick}
         />
         <div className={'indicator-container'}>
           <button
