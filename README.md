@@ -1,4 +1,4 @@
-# 모인 프론트엔드 과제 - Auto Completion Select 구현
+# Auto Completion Select 구현
 
 
 ### 실행 방법
